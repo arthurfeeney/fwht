@@ -39,6 +39,6 @@ These ideas basically yoinked from https://arxiv.org/pdf/1304.7054
 
 ## Caveats
 
-1. If the input is not a power of 2, the kernel has to explicitly zero pad it to the next power of 2. This happens inside the kernel, so it does not need to allocate in global memory, just doing extra compute. I'm not sure if there's a way to work around this.
+1. If the input is not a power of 2, the kernel has to explicitly zero pad it to the next power of 2. This happens inside the kernel, so it does not need to allocate in global memory, just doing extra compute. Triton requires block sizes to be powers of 2, so I'm not sure if there's a way to work around this.
 2. If the input size is not a power of 2, it does an extra iteration applying a hadamard
 transform with order that is a power of 2. This step could be done with tensor cores, but I haven't gotten it working yet.
