@@ -45,18 +45,21 @@ def hadamard_2_f32(device):
     H_2 = torch.tensor(
         [[sign_to_number(s) for s in row] for row in signs_2], dtype=torch.float32, device=device
     )
-    return torch.block_diag(H_2, H_2, H_2, H_2, H_2, H_2, H_2, H_2)
+    return H_2
+    #return torch.block_diag(H_2, H_2, H_2, H_2, H_2, H_2, H_2, H_2)
 
 def hadamard_4_f32(device):
     H_4 = torch.tensor(
         [[sign_to_number(s) for s in row] for row in signs_4], dtype=torch.float32, device=device
     )
-    return torch.block_diag(H_4, H_4, H_4, H_4)
+    return H_4
+    #return torch.block_diag(H_4, H_4, H_4, H_4)
 
 def hadamard_8_f32(device):
     H_8 = torch.tensor(
         [[sign_to_number(s) for s in row] for row in signs_8], dtype=torch.float32, device=device
     )
+    return H_8
     return torch.block_diag(H_8, H_8)
 
 def hadamard_16_f32(device):
