@@ -5,6 +5,12 @@ in triton.
 
 This is a work-in-progress.
 
+TODO:
+1. setup and test lower precisions (fp16, bf16, fp8)
+2. Much more heavily test weird sizes. 
+3. float32 performance is a little disappointing. (3x slower than torch.clone.)
+4. It seems surprisingly imprecise relative to a referance implementation on random inputs :shrug:
+
 ## Notes on Implementation
 
 The implementation relies on two things:
@@ -29,5 +35,8 @@ This can also be used to make funkier sizes:
 
 These ideas basically yoinked from https://arxiv.org/pdf/1304.7054 
 
-[HadaCore](https://arxiv.org/pdf/2412.08832v1) seems to be doing pretty much the same strategy,
-but does way more low-level stuff. (I also copy the way the handle powers of 2---doing an extra iteration with smaller block diagonal matrices). The implementation from [Dao-AILab](https://github.com/Dao-AILab/fast-hadamard-transform/tree/master) seems to work with chunks of size 8 and does not use tensor cores.
+[HadaCore](https://arxiv.org/pdf/2412.08832v1) seems to be doing pretty much the same strategy, but does way more low-level stuff.
+
+## Caveats
+
+1. If the input is not a power of 2, the kernel has to explicitly zero pad it to the next power of 2. This happens inside the kernel, so it does not need to allocate in global memory, just doing extra compute. I'm not sure if there's a way to work around this.
