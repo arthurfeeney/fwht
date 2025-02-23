@@ -9,7 +9,7 @@ TODO:
 1. setup and test lower precisions (fp16, bf16, fp8)
 2. Much more heavily test weird sizes. 
 3. float32 performance is a little disappointing. (3x slower than torch.clone.)
-4. It seems surprisingly imprecise relative to a referance implementation on random inputs :shrug:
+4. It seems surprisingly imprecise relative to a referance implementation on randn inputs :shrug:
 
 ## Notes on Implementation
 
@@ -40,3 +40,5 @@ These ideas basically yoinked from https://arxiv.org/pdf/1304.7054
 ## Caveats
 
 1. If the input is not a power of 2, the kernel has to explicitly zero pad it to the next power of 2. This happens inside the kernel, so it does not need to allocate in global memory, just doing extra compute. I'm not sure if there's a way to work around this.
+2. If the input size is not a power of 2, it does an extra iteration applying a hadamard
+transform with order that is a power of 2. This step could be done with tensor cores, but I haven't gotten it working yet.
