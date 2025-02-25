@@ -15,16 +15,16 @@ def _build_hadamard_2(device):
     return torch.tensor([[1, 1], [1, -1]], device=device, dtype=torch.float64)
 
 def _build_hadamard_16(device):
-    H_16 = hadamard_16(device, dtype=torch.float64)
+    H_16 = hadamard_16(device=device, dtype=torch.float64)
     return H_16
 
 def _build_hadamard_256(device):
-    H_16 = hadamard_16(device, dtype=torch.float64)
+    H_16 = hadamard_16(device=device, dtype=torch.float64)
     return torch.kron(H_16, H_16)
 
 def _build_hadamard_512(device):
     H_2 = _build_hadamard_2(device)
-    H_16 = hadamard_16(device, dtype=torch.float64)
+    H_16 = hadamard_16(device=device, dtype=torch.float64)
     return torch.kron(H_2, torch.kron(H_16, H_16))
 
 def _build_hadamard_1024(device):
@@ -38,7 +38,7 @@ def _build_hadamard_2048(device):
     return torch.kron(H_2, H_1024)
 
 def _build_hadamard_4096(device):
-    H_16 = hadamard_16(device, dtype=torch.float64)
+    H_16 = hadamard_16(device=device, dtype=torch.float64)
     return torch.kron(H_16, torch.kron(H_16, H_16))
 
 def _build_hadamard_8192(device):
@@ -146,7 +146,7 @@ def test_fwht_4096_scale():
     
 def test_fwht_8192_scale():
     H_8192 = _build_hadamard_4096(DEVICE)
-    fwht_wrapper(4096, H_8192)
+    fwht_wrapper(8192, H_8192)
     
 def right_zero_pad(a, size):
     zeros = torch.zeros(a.size(0), size, device=DEVICE)
@@ -177,3 +177,10 @@ def test_fwht_4096_backward():
     out = fast_hadamard_transform(a, scale)
     loss = out.sum()
     loss.backward()
+    
+def test_fwht_small():
+    for size in (2, 4, 8, 16):
+        a = rand_ones((8, size), device=DEVICE).to(torch.float32)
+        expected = _reference_fwht(a.clone())
+        actual = fast_hadamard_transform(a)
+        assert torch.allclose(expected, actual, atol=1e-3)

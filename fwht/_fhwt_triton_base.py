@@ -40,25 +40,25 @@ signs_16 = """++++++++++++++++
 ++----++--++++--
 +--+-++--++-+--+""".split('\n')
 
-def hadamard_2(device, dtype):
+def hadamard_2(dtype, device=None):
     H_2 = torch.tensor(
         [[sign_to_number(s) for s in row] for row in signs_2], dtype=dtype, device=device
     )
     return H_2
 
-def hadamard_4(device, dtype):
+def hadamard_4(dtype, device=None):
     H_4 = torch.tensor(
         [[sign_to_number(s) for s in row] for row in signs_4], dtype=dtype, device=device
     )
     return H_4
 
-def hadamard_8(device, dtype):
+def hadamard_8(dtype, device=None):
     H_8 = torch.tensor(
         [[sign_to_number(s) for s in row] for row in signs_8], dtype=dtype, device=device
     )
     return H_8
 
-def hadamard_16(device, dtype):
+def hadamard_16(dtype, device=None):
     return torch.tensor(
         [[sign_to_number(s) for s in row] for row in signs_16], dtype=dtype, device=device
     )
