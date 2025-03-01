@@ -5,3 +5,7 @@ build-backend = "hatchling.build"
 [project]
 name="fwht"
 version="2025.0.0"
+dependencies=[
+    'triton>=3.0.0',
+    'pytorch>=2.1'
+]
