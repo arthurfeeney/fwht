@@ -1,7 +1,8 @@
 import torch
 from torch import nn
 
-from fwht._fwht_triton import fwht
+from fwht.kernel._fwht_triton import fwht
+
 
 class HadamardTransformAutograd(torch.autograd.Function):
     @staticmethod

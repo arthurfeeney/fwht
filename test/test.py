@@ -26,8 +26,10 @@ _INPUT_GENERATORS = [
     (partial(rand_ones, device=DEVICE), 1e-3)
 ]
 
-_SCALES = [
-    
+_SCALE_GENERATORS = [
+    lambda _: 1.0,
+    lambda size: 1 / size,
+    lambda size: 1 / (2 ** (size - 1))
 ]
 
 def test_reference_orthogonal():
@@ -36,48 +38,47 @@ def test_reference_orthogonal():
         H = hadamard(size, DEVICE).float()
         assert torch.allclose(H @ H.T, a * size) 
 
-def fwht_wrapper(size, H, scale=1):
+def fwht_wrapper(size):
     for gen, atol in _INPUT_GENERATORS:
-        a = gen((8, size))
-        expected1 = einops.einsum(H, a.double(), 'r c, b c -> b r').float() * scale
-        expected2 = _reference_fwht(a.clone(), scale=scale)
-        actual = fast_hadamard_transform(a, scale)
-        assert torch.allclose(expected1, actual, atol=atol * scale)
-        assert torch.allclose(expected2, actual, atol=atol * scale)
+        for scale_gen in _SCALE_GENERATORS:
+            a = gen((8, size)).float()
+            scale = scale_gen(size)
+            H = hadamard(size, DEVICE)
+            expected1 = einops.einsum(H, a.double(), 'r c, b c -> b r').float() * scale
+            expected2 = _reference_fwht(a.clone(), scale=scale)
+            actual = fast_hadamard_transform(a, scale)
+            assert torch.allclose(expected1, actual, atol=atol * scale)
+            assert torch.allclose(expected2, actual, atol=atol * scale)
+
+def test_fwht_32():
+    fwht_wrapper(32)
+
+def test_fwht_128():
+    fwht_wrapper(128)
 
 def test_fwht_256():
-    H_256 = hadamard(256, DEVICE)
-    fwht_wrapper(256, H_256)
+    fwht_wrapper(256)
 
 def test_fwht_512():
-    H_512 = hadamard(512, DEVICE)
-    fwht_wrapper(512, H_512)
+    fwht_wrapper(512)
 
 def test_fwht_1024():
-    H_1024 = hadamard(1024, DEVICE)
-    fwht_wrapper(1024, H_1024)
+    fwht_wrapper(1024)
     
 def test_fwht_2048():
-    H_2048 = hadamard(2048, DEVICE)
-    fwht_wrapper(2048, H_2048)
+    fwht_wrapper(2048)
 
 def test_fwht_4096():
-    H_4096 = hadamard(4096, DEVICE)
-    fwht_wrapper(4096, H_4096)
-        
-def test_fwht_4096_scale():
-    scale = 1e-4
-    H_4096 = hadamard(4096, DEVICE)
-    fwht_wrapper(4096, H_4096, scale)
+    fwht_wrapper(4096)
     
 def test_fwht_8192_scale():
-    H_8192 = hadamard(8192, DEVICE)
-    fwht_wrapper(8192, H_8192)
+    fwht_wrapper(8192)
     
 def right_zero_pad(a, size):
     zeros = torch.zeros(a.size(0), size, device=DEVICE)
     zeros[:, :a.size(1)] = a
     return zeros
+
     
 def test_fwht_276_implicit_pad():
     size = 272
@@ -88,7 +89,6 @@ def test_fwht_276_implicit_pad():
     actual = fast_hadamard_transform(a)
     assert torch.allclose(expected1[:, :size], actual, atol=1e-3)
 
-"""    
 def test_fwht_4096_f16():
     size = 4096
     scale = 1
@@ -96,26 +96,3 @@ def test_fwht_4096_f16():
     expected = _reference_fwht(a.clone())
     actual = fast_hadamard_transform(a, scale)
     assert torch.allclose(expected, actual, atol=1 * scale)
-
-def test_fwht_4096_backward():
-    size = 4096
-    scale = 1
-    a = torch.randn(8, size, device=DEVICE, dtype=torch.float16, requires_grad=True)
-    out = fast_hadamard_transform(a, scale)
-    loss = out.sum()
-    loss.backward()
-    
-def test_fwht_small():
-    for size in (2, 4, 8, 16):
-        a = rand_ones((8, size), device=DEVICE).to(torch.float32)
-        expected = _reference_fwht(a.clone())
-        actual = fast_hadamard_transform(a)
-        assert torch.allclose(expected, actual, atol=1e-3)
-        
-def test_fwht_medium():
-    for size in (32,):
-        a = rand_ones((8, size), device=DEVICE).to(torch.float32)
-        expected = _reference_fwht(a.clone())
-        actual = fast_hadamard_transform(a)
-        assert torch.allclose(expected, actual, atol=1e-3)
-"""
