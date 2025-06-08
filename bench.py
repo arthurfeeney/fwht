@@ -1,7 +1,5 @@
-import fwht._fwht_triton
 import torch
 import triton
-
 import fwht
 
 DEVICE = 'cuda'
@@ -12,13 +10,13 @@ for dtype in [torch.float16, torch.float32]:
     configs.append(
         triton.testing.Benchmark(
             x_names=["size"],
-            x_vals=[256, 512, 1024, 2048, 4096],
+            x_vals=[128, 256, 512, 1024, 2048, 4096],
             line_arg="provider",
             line_vals=["memcpy", "fwht-func", "fwht-func-inplace", "fwht-module"],
             line_names=["Mem Copy", "fwht-func","fwht-func-inplace", "fwht-module"],
             styles=[("green", "-"), ("blue", "-"), ("red", "-"), ("black", "-")],
             ylabel="ms",
-            plot_name="fwht-per-vs-memcpy",
+            plot_name="fwht-perf-vs-memcpy",
             args={"dtype": dtype}
         ))
 
